@@ -13,10 +13,13 @@ spring:
     open-in-view: false
     properties:
       hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
         show_sql: true
         format_sql: true
         jdbc:
           time_zone: Asia/Seoul
+    database: postgresql
   datasource:
     driver-class-name: org.postgresql.Driver
     username: ${DB_USER}
