@@ -1,4 +1,4 @@
-package com.areastory.article.api.controller;
+package com.areastory.location.api.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -25,7 +25,12 @@ dependencies {
 
     //jpa
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'com.mysql:mysql-connector-j'
+//    runtimeOnly 'com.mysql:mysql-connector-j'
+
+
+    //postgresql
+    implementation 'org.postgresql:postgresql:42.7.2'
+    runtimeOnly 'org.postgresql:postgresql'
 
     //lombok
     compileOnly 'org.projectlombok:lombok'

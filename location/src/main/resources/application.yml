@@ -18,11 +18,10 @@ spring:
         jdbc:
           time_zone: Asia/Seoul
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      password: ${DB_PASSWORD}
-      username: ${DB_USER}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
     url: ${DB_URL}
+    password: ${DB_PASSWORD}
 
   mvc:
     pathmatch:

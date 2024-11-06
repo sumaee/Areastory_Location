@@ -1,2 +1,3 @@
-package com.areastory.location.config;public class RedisConfig {
+package com.areastory.location.config;
+public class RedisConfig {
 }
