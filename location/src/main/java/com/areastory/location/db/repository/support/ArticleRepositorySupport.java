@@ -19,5 +19,7 @@ public interface ArticleRepositorySupport {
     List<LocationResp> getInitDongeupmyeon();
 
 
+    LocationResp init(String dosi, String sigungu, String dongeupmyeon);
+
     List<Article> getImage(List<LocationDto> locationList, Long userId);
 }

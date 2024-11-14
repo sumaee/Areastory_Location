@@ -119,6 +119,19 @@ public class ArticleRepositorySupportImpl implements ArticleRepositorySupport {
         return tuples.stream().map(this::tupleToDongeupmyeonResp).collect(Collectors.toList());
     }
 
+    @Override
+    public LocationResp init(String dosi, String sigungu, String dongeupmyeon){
+        Tuple tuples = query
+                .select(article.dosi, article.sigungu, article.dongeupmyeon, article.dailyLikeCount, article.image, article.articleId)
+                .from(article)
+                .where(getWhereAnd(new LocationDto(dosi, sigungu, dongeupmyeon)))
+                .orderBy(article.dailyLikeCount.desc())
+                .limit(1)
+                .fetchOne();
+
+        return tupleToDongeupmyeonResp(tuples);
+    }
+
 
     @Override
     public List<Article> getImage(List<LocationDto> locationList, Long userId) {
