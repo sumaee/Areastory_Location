@@ -7,4 +7,5 @@ public interface KafkaProperties {
     String DELETE = "delete";
     String UPDATE = "update";
     String INSERT = "insert";
+
 }
