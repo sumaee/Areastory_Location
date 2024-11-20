@@ -1,13 +1,14 @@
 package com.areastory.location.api.service.impl;
 
-import com.areastory.location.api.service.LocationMap;
 import com.areastory.location.api.service.LocationService;
 import com.areastory.location.db.entity.Article;
 import com.areastory.location.db.repository.ArticleRepository;
 import com.areastory.location.dto.common.LocationDto;
 import com.areastory.location.dto.response.LocationResp;
+import com.areastory.location.util.ObjectMapperUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,13 +19,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class LocationServiceImpl implements LocationService {
-    private final LocationMap locationMap;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final ObjectMapperUtil objectMapperUtil;
     private final ArticleRepository articleRepository;
 
 
     @Override
     public List<LocationResp> getMapImages(List<LocationDto> locationList) {
-        return locationList.stream().map(o1 -> locationMap.getMap().get(new LocationDto(o1.getDosi(), o1.getSigungu(), o1.getDongeupmyeon()))).filter(Objects::nonNull).collect(Collectors.toList());
+        redisTemplate.opsForValue().get(objectMapperUtil.toString(locationList.get(0)));
+        return locationList.stream()
+                .map(objectMapperUtil::toString)
+                .map(key -> redisTemplate.opsForValue().get(key))
+                .filter(Objects::nonNull)
+                .map(value -> objectMapperUtil.toObject(value, LocationResp.class).orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+//        return locationList.stream().map(o1 -> locationMap.getMap().get(new LocationDto(o1.getDosi(), o1.getSigungu(), o1.getDongeupmyeon()))).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Override

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.areastory.location.db.entity.QArticle.article;
-import static com.querydsl.jpa.JPAExpressions.select;
 
 
 @Repository
@@ -32,73 +31,103 @@ public class ArticleRepositorySupportImpl implements ArticleRepositorySupport {
 
     @Override
     public LocationResp getDailyLikeCountData(String type, Long articleId, LocationDto locationDto, Long dailyLikeCount) {
-        SubQueryExpression<Tuple> subQuery;
+        SubQueryExpression<Tuple> subQuery = query.select(article.articleId, article.dailyLikeCount.max())
+                .from(article)
+                .where(getWhereAnd(locationDto)
+                        .and(article.articleId.ne(articleId))
+                        .and(article.dailyLikeCount.gt(dailyLikeCount)))
+                .groupBy(article.articleId);
+
         Tuple tuple;
         if (type.equals("dongeupmyeon")) {
-            subQuery = select(article.dosi, article.sigungu, article.dongeupmyeon, article.dailyLikeCount.max())
+            tuple = query.select(article.dosi, article.sigungu, article.dongeupmyeon, article.dailyLikeCount, article.image, article.articleId)
                     .from(article)
-                    .where(getWhereAnd(locationDto)
-                            .and(article.dailyLikeCount.gt(dailyLikeCount))
-                            .and(article.articleId.ne(articleId)))
-                    .groupBy(article.dosi, article.sigungu, article.dongeupmyeon);
-
-            tuple = query
-                    .select(article.dosi, article.sigungu, article.dongeupmyeon, article.dailyLikeCount, article.image, article.articleId)
-                    .from(article)
-                    .where(
-                            Expressions.list(article.dosi, article.sigungu, article.dongeupmyeon, article.dailyLikeCount)
-                                    .in(subQuery)
-                                    .and(getWhereAnd(locationDto))
-                                    .and(article.articleId.ne(articleId))
-                    )
-                    .groupBy(article.dosi, article.sigungu, article.dongeupmyeon)
-                    .fetchOne();
-
+                    .where(Expressions.list(article.articleId, article.dailyLikeCount).in(subQuery))
+                    .fetchFirst();
             return tupleToDongeupmyeonResp(tuple);
         } else if (type.equals("sigungu")) {
-            subQuery = select(article.dosi, article.sigungu, article.dailyLikeCount.max())
+            tuple = query.select(article.dosi, article.sigungu, article.dailyLikeCount, article.image, article.articleId)
                     .from(article)
-                    .where(getWhereAnd(locationDto)
-                            .and(article.dailyLikeCount.gt(dailyLikeCount))
-                            .and(article.articleId.ne(articleId)))
-                    .groupBy(article.dosi, article.sigungu);
-
-            tuple = query
-                    .select(article.dosi, article.sigungu, article.dailyLikeCount, article.image, article.articleId)
-                    .from(article)
-                    .where(
-                            Expressions.list(article.dosi, article.sigungu, article.dailyLikeCount)
-                                    .in(subQuery)
-                                    .and(getWhereAnd(locationDto))
-                                    .and(article.articleId.ne(articleId))
-                    )
-                    .groupBy(article.dosi, article.sigungu)
-                    .fetchOne();
+                    .where(Expressions.list(article.articleId, article.dailyLikeCount).in(subQuery))
+                    .fetchFirst();
             return tupleToSigunguResp(tuple);
         } else {
-            subQuery = select(article.dosi, article.dailyLikeCount.max())
+            tuple = query.select(article.dosi, article.dailyLikeCount, article.image, article.articleId)
                     .from(article)
-                    .where(getWhereAnd(locationDto)
-                            .and(article.dailyLikeCount.gt(dailyLikeCount))
-                            .and(article.articleId.ne(articleId)))
-                    .groupBy(article.dosi);
-
-            tuple = query
-                    .select(article.dosi, article.dailyLikeCount, article.image, article.articleId)
-                    .from(article)
-                    .where(
-                            Expressions.list(article.dosi, article.dailyLikeCount)
-                                    .in(subQuery)
-                                    .and(getWhereAnd(locationDto))
-                                    .and(article.articleId.ne(articleId))
-                    )
-                    .groupBy(article.dosi)
-                    .fetchOne();
-            return tupleToDosiResp(tuple);
-
+                    .where(Expressions.list(article.articleId, article.dailyLikeCount).in(subQuery))
+                    .fetchFirst();
+            return tupleToSigunguResp(tuple);
         }
     }
+//    @Override
+//    public LocationResp getDailyLikeCountData(String type, Long articleId, LocationDto locationDto, Long dailyLikeCount) {
+//        SubQueryExpression<Tuple> subQuery;
+//        Tuple tuple;
+//        if (type.equals("dongeupmyeon")) {
+//            subQuery = select(article.dosi, article.sigungu, article.dongeupmyeon, article.dailyLikeCount.max())
+//                    .from(article)
+//                    .where(getWhereAnd(locationDto)
+//                            .and(article.dailyLikeCount.gt(dailyLikeCount))
+//                            .and(article.articleId.ne(articleId)))
+//                    .groupBy(article.dosi, article.sigungu, article.dongeupmyeon);
+//
+//            tuple = query
+//                    .select(article.dosi, article.sigungu, article.dongeupmyeon, article.dailyLikeCount, article.image, article.articleId)
+//                    .from(article)
+//                    .where(
+//                            Expressions.list(article.dosi, article.sigungu, article.dongeupmyeon, article.dailyLikeCount)
+//                                    .in(subQuery)
 
+    /// /                                    .and(getWhereAnd(locationDto))
+    /// /                                    .and(article.articleId.ne(articleId))
+//                    )
+//                    .orderBy(article.articleId.desc())
+//                    .fetchFirst();
+//
+//            return tupleToDongeupmyeonResp(tuple);
+//        } else if (type.equals("sigungu")) {
+//            subQuery = select(article.dosi, article.sigungu, article.dailyLikeCount.max())
+//                    .from(article)
+//                    .where(getWhereAnd(locationDto)
+//                            .and(article.dailyLikeCount.gt(dailyLikeCount))
+//                            .and(article.articleId.ne(articleId)))
+//                    .groupBy(article.dosi, article.sigungu);
+//
+//            tuple = query
+//                    .select(article.dosi, article.sigungu, article.dailyLikeCount, article.image, article.articleId)
+//                    .from(article)
+//                    .where(
+//                            Expressions.list(article.dosi, article.sigungu, article.dailyLikeCount)
+//                                    .in(subQuery)
+//                                    .and(getWhereAnd(locationDto))
+//                                    .and(article.articleId.ne(articleId))
+//                    )
+//                    .orderBy(article.articleId.desc())
+//                    .fetchFirst();
+//            return tupleToSigunguResp(tuple);
+//        } else {
+//            subQuery = select(article.dosi, article.dailyLikeCount.max())
+//                    .from(article)
+//                    .where(getWhereAnd(locationDto)
+//                            .and(article.dailyLikeCount.gt(dailyLikeCount))
+//                            .and(article.articleId.ne(articleId)))
+//                    .groupBy(article.dosi);
+//
+//            tuple = query
+//                    .select(article.dosi, article.dailyLikeCount, article.image, article.articleId)
+//                    .from(article)
+//                    .where(
+//                            Expressions.list(article.dosi, article.dailyLikeCount)
+//                                    .in(subQuery)
+//                                    .and(getWhereAnd(locationDto))
+//                                    .and(article.articleId.ne(articleId))
+//                    )
+//                    .orderBy(article.articleId.desc())
+//                    .fetchFirst();
+//
+//            return tupleToDosiResp(tuple);
+//        }
+//    }
     @Override
     public List<LocationResp> getInitDongeupmyeon() {
 
@@ -120,7 +149,7 @@ public class ArticleRepositorySupportImpl implements ArticleRepositorySupport {
     }
 
     @Override
-    public LocationResp init(String dosi, String sigungu, String dongeupmyeon){
+    public LocationResp init(String dosi, String sigungu, String dongeupmyeon) {
         Tuple tuples = query
                 .select(article.dosi, article.sigungu, article.dongeupmyeon, article.dailyLikeCount, article.image, article.articleId)
                 .from(article)

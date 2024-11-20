@@ -1,11 +1,12 @@
 package com.areastory.location.api.controller;
 
-import com.areastory.location.api.service.LocationMap;
 import com.areastory.location.db.repository.ArticleRepository;
 import com.areastory.location.dto.common.LocationDto;
 import com.areastory.location.dto.response.LocationResp;
+import com.areastory.location.util.ObjectMapperUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequestMapping("/api")
 @Slf4j
 public class InitLocationController {
-    private final LocationMap locationMap;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final ObjectMapperUtil objectMapperUtil;
     private final ArticleRepository articleRepository;
     private final AtomicInteger totalLocationCount = new AtomicInteger(1323);
     private final AtomicInteger currentLocationCount = new AtomicInteger(0);
@@ -38,6 +40,7 @@ public class InitLocationController {
                 ResponseEntity.ok(String.format("%.3f", (double) currentLocationCount.get() / totalLocationCount.get() * 100))
                 : ResponseEntity.ok("init 진행 중이 아님");
     }
+
 
     @GetMapping("/init")
     public ResponseEntity<String> initMap() {
@@ -74,7 +77,7 @@ public class InitLocationController {
     private Set<LocationDto> getAddress() throws IOException {
         Set<LocationDto> address = new HashSet<>();
         BufferedReader addressReader = new BufferedReader(new FileReader("data22.txt"));
-        String line = "";
+        String line;
         while ((line = addressReader.readLine()) != null) {
             String[] add = line.split(",");
             address.add(new LocationDto(add[0], add[1], add[2]));
@@ -91,7 +94,15 @@ public class InitLocationController {
         LocationResp locationResp = articleRepository.init(address.getDosi(), address.getSigungu(), address.getDongeupmyeon());
         //불러온 데이터 넣기
         if (locationResp != null) {
-            locationMap.getMap().put(address, locationResp);
+            LocationResp redisResp = new LocationResp(locationResp.getArticleId(), locationResp.getImage(), locationResp.getLikeCount(), address);
+            try {
+                String key = objectMapperUtil.toString(address);
+                String value = objectMapperUtil.toString(redisResp);
+                redisTemplate.opsForValue().set(key, value);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
         }
         currentLocationCount.set(currentLocationCount.get() + 1);
         cdl.countDown();
