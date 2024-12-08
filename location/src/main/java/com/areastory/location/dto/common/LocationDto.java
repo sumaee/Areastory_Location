@@ -44,4 +44,16 @@ public class LocationDto {
     public int hashCode() {
         return Objects.hash(dosi, sigungu, dongeupmyeon);
     }
+
+    @Override
+    public String toString() {
+        if (sigungu == null) {
+            return dosi;
+        } else if (dongeupmyeon == null) {
+            return dosi + ":" + sigungu;
+        }
+
+        return dosi + ":" + sigungu + ":" + dongeupmyeon;
+    }
+
 }

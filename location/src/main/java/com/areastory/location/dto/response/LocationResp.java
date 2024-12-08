@@ -58,4 +58,14 @@ public class LocationResp {
         this.articleId = articleId;
         this.likeCount = likeCount;
     }
+
+    @Override
+    public String toString() {
+        return "LocationResp{" +
+                "locationDto=" + locationDto +
+                ", image='" + image + '\'' +
+                ", articleId=" + articleId +
+                ", likeCount=" + likeCount +
+                '}';
+    }
 }

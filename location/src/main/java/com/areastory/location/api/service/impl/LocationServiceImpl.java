@@ -26,15 +26,13 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public List<LocationResp> getMapImages(List<LocationDto> locationList) {
-        redisTemplate.opsForValue().get(objectMapperUtil.toString(locationList.get(0)));
         return locationList.stream()
-                .map(objectMapperUtil::toString)
+                .map(LocationDto::toString)
                 .map(key -> redisTemplate.opsForValue().get(key))
                 .filter(Objects::nonNull)
                 .map(value -> objectMapperUtil.toObject(value, LocationResp.class).orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-//        return locationList.stream().map(o1 -> locationMap.getMap().get(new LocationDto(o1.getDosi(), o1.getSigungu(), o1.getDongeupmyeon()))).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Override
@@ -47,8 +45,6 @@ public class LocationServiceImpl implements LocationService {
         } else {
             return articleRepository.getImage(locationList, userId).stream().map(this::toDosiResp).collect(Collectors.toList());
         }
-
-
     }
 
     private LocationResp toDongResp(Article article) {

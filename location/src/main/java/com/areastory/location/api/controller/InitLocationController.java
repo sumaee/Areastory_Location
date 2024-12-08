@@ -96,7 +96,7 @@ public class InitLocationController {
         if (locationResp != null) {
             LocationResp redisResp = new LocationResp(locationResp.getArticleId(), locationResp.getImage(), locationResp.getLikeCount(), address);
             try {
-                String key = objectMapperUtil.toString(address);
+                String key = address.toString();
                 String value = objectMapperUtil.toString(redisResp);
                 redisTemplate.opsForValue().set(key, value);
             } catch (Exception e) {

@@ -102,6 +102,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         // 좋아요를 누른 경우라면
         if (articleKafkaDto.getDailyLikeCount() > currLikeCount) {
+            log.info("좋아요 갱신");
             // 해당 지역이 redis에 안올라가 있거나 현재 redis의 좋아요보다 더 높은 좋아요 수라면 redis 갱신
             if (currRedisLocationResp == null || articleKafkaDto.getDailyLikeCount() > currRedisLocationResp.getLikeCount()) {
                 currRedisLocationResp = new LocationResp(
@@ -110,8 +111,9 @@ public class ArticleServiceImpl implements ArticleService {
                         articleKafkaDto.getDailyLikeCount(),
                         locationDto
                 );
-
-                redisTemplate.opsForValue().set(objectMapperUtil.toString(locationDto), objectMapperUtil.toString(currRedisLocationResp));
+                log.info("레디스 갱신");
+                log.info(currRedisLocationResp.toString());
+                redisTemplate.opsForValue().set(locationDto.toString(), objectMapperUtil.toString(currRedisLocationResp));
             }
         }
         //좋아요 취소를 누르고 현재 redis에 올라가있는 게시물의 좋아요 취소인 경우
@@ -123,7 +125,7 @@ public class ArticleServiceImpl implements ArticleService {
 
             // changeLocationResp를 redis에 넣는데 없다면 현재 데이터 좋아요 수 1개 줄인것 넣기
             redisTemplate.opsForValue()
-                    .set(objectMapperUtil.toString(locationDto),
+                    .set(locationDto.toString(),
                             objectMapperUtil.toString(Objects.requireNonNullElseGet(changeLocationResp,
                                     () -> new LocationResp(articleKafkaDto.getArticleId(), articleKafkaDto.getThumbnail(), articleKafkaDto.getDailyLikeCount(), locationDto))));
 
